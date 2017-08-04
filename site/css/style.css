@@ -1,0 +1,93 @@
+form {
+    display: block;
+    margin-left: 50px;
+    margin-top: 30px;
+}
+
+table {
+    margin-left: 50px;
+    margin-top: 50px;
+    font-size: 20px;
+    box-shadow: 0px 14px 28px rgba(0, 0, 0, 0.19), 0px 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+td {
+    padding: 12px;
+}
+
+#loader {
+    width: 100%;
+    height: calc(100% - 140px);
+    //background-image: url(../loading.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+body {
+    background: rgb(40, 40, 40);
+    color: white;
+}
+h2 {
+    margin: 20 20 20;
+}
+tr {
+   background: rgb(247, 148, 29) 
+}
+tr:nth-child(even) {
+    background-color: rgb(248, 177, 100);
+}
+tr:nth-child(1) {
+    background: rgb(30, 30, 30);
+}
+.navbar {
+    background: rgb(247, 148, 29);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.19), 0px 6px 6px rgba(0, 0, 0, 0.23);
+}
+.navbar-brand {
+    color: white !important;
+}
+.btn-primary {
+    border-radius: 0px;
+    background: rgb(247, 148, 29);
+    color: white;
+    border: none;
+    box-shadow: 0px 14px 28px rgba(0, 0, 0, 0.19), 0px 10px 10px rgba(0, 0, 0, 0.22);
+}
+.btn-primary:hover {
+    background-color: rgb(248, 167, 69);
+}
+.card {
+    box-shadow: 0px 14px 28px rgba(0, 0, 0, 0.19), 0px 10px 10px rgba(0, 0, 0, 0.22);
+    border-radius: 0px;
+    margin: 0 auto;
+    margin-top: 30px;
+    background: rgb(60, 60, 60);
+    height: 400px;
+    width: 700px;
+}
+.title {
+    width: 100%;
+    background: rgb(247, 148, 29);
+    margin: 0;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.19), 0px 3px 6px rgba(0, 0, 0, 0.23);
+}
+.divider {
+    width: 100%;
+    height: 1px;
+    background: black;
+    margin: 0px;
+    padding: 0px;
+}
+/*  A LUCRAT ARMAND*/
+input[type="submit"]{
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+}
+
+#download {
+    position: fixed;
+    top: 100px;
+    right: 50px;
+}
