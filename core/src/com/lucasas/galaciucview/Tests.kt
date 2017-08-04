@@ -20,25 +20,40 @@ fun testColorResults(image: String = "positive1")
     var oneColor = false
     var averageVSmaller = false
     var greyBig = false
+    var greenBlueRatioBig = false
+    var brownBlueRatioBig = false
+    var brownBlueNoGreen = (if (result.blue != 0) result.brown / result.blue else 0) > 1 && result.green == 0
+    var blueBrownRatio = if (result.brown == 0) 0 else result.blue / result.brown
+    var greenBrownRatio = if (result.brown == 0) 0 else result.green / result.brown
 
     if (oneOrLess(result.brown, result.green, result.blue))
         oneColor = true
 
     averageVSmaller = result.averageV < 30
     greyBig = result.grey > 10
+    if (result.blue != 0) greenBlueRatioBig = (result.green / result.blue) > 3
+    if (result.blue != 0) brownBlueRatioBig = (result.brown / result.blue) > 4
 
     println()
-    println("#$image ${if(oneColor || averageVSmaller || greyBig) "FAIL" else ""}")
+    println("#$image ${if(oneColor || averageVSmaller || greyBig || greenBlueRatioBig || brownBlueRatioBig || brownBlueNoGreen || result.white > 2) "FAIL" else ""}")
+    println("Brick: ${result.brick}")
     println("Brown: ${result.brown}")
     println("Green: ${result.green}")
     println("Blue: ${result.blue}")
     println("Red: ${result.red}")
     println("Grey: ${result.grey}")
+    println("White: ${result.white}")
     println("Other: ${result.other}")
-    println("Green/Blue: ${result.green / result.blue}")
+    println("Brown/Blue no Green: ${brownBlueNoGreen}")
+    println("Blue/Brown: ${blueBrownRatio}")
+    println("Green/Blue: ${if (result.blue != 0) result.green / result.blue else 0}")
+    println("Green/Brown: $greenBrownRatio")
+    println("Brown/Green: ${if (result.green != 0) result.brown / result.green else 0}")
+    println("Brown/Blue: ${if (result.blue != 0) result.brown / result.blue else 0}")
     println("BlueS: ${result.blueS}")
     println("BlueV: ${result.blueV}")
     println("AverageV: ${result.averageV}")
+    println("Score:${result.score}")
 }
 
 fun testColors(texture: String)

@@ -77,15 +77,17 @@ fun rgbToHsv(rp: Float, gp: Float, bp: Float): Array<Float>
 
 enum class ColorType
 {
-    Brown, Green, Blue, Red, Grey, Other
+    Brown, Green, Blue, Red, Grey, White, Other, Brick
 }
 
 fun getColorType(h: Float, s: Float, v: Float) : ColorType
 {
+    if (v > 70 && s < 9) return ColorType.White
     if (s < 13 || v < 13) return ColorType.Grey
 
     when
     {
+        h.between(351f, 360f) -> return ColorType.Brick
         h.between(25f, 56f) -> return ColorType.Brown
         h.between(75f, 144f) -> return ColorType.Green
         h.between(160f, 260f) -> return ColorType.Blue
@@ -94,11 +96,24 @@ fun getColorType(h: Float, s: Float, v: Float) : ColorType
     }
 }
 
-data class ImageColorType(var brown: Int = 0, var green: Int = 0, var blue: Int = 0, var red: Int = 0, var grey: Int = 0, var other: Int = 0, var blueS: Float = 0f, var blueV: Float = 0f, var averageV: Float = 0f)
+data class ImageAnalysisResult(
+                          var brown: Int = 0,
+                          var green: Int = 0,
+                          var blue: Int = 0,
+                          var red: Int = 0,
+                          var grey: Int = 0,
+                          var brick: Int = 0,
+                          var white: Int = 0,
+                          var other: Int = 0,
+                          var blueS: Float = 0f,
+                          var blueV: Float = 0f,
+                          var averageV: Float = 0f,
+                          var score: Int = 0
+                         )
 
-fun colorTypesPerImage(name: String): ImageColorType
+fun colorTypesPerImage(name: String): ImageAnalysisResult
 {
-    val result = ImageColorType()
+    val result = ImageAnalysisResult()
 
     val img = ImageIO.read(File("$testType/$name"))
     val dominantColor = ColorThief.getColorMap(img, 5).vboxes[0].avg(false)
@@ -111,11 +126,13 @@ fun colorTypesPerImage(name: String): ImageColorType
             result.blueS = hsv[1]
             result.blueV = hsv[2]
         }
+        ColorType.Brick -> result.brick++
         ColorType.Red -> result.red++
         ColorType.Grey -> result.grey++
         ColorType.Green -> result.green++
         ColorType.Other -> result.other++
         ColorType.Brown -> result.brown++
+        ColorType.White -> result.white++
     }
 
     result.averageV = hsv[2]
@@ -144,11 +161,13 @@ fun colorTypesPerImage(name: String): ImageColorType
                 result.blueS += hsv[1]
                 result.blueV += hsv[2]
             }
+            ColorType.Brick -> result.brick++
             ColorType.Red -> result.red++
             ColorType.Grey -> result.grey++
             ColorType.Green -> result.green++
             ColorType.Other -> result.other++
             ColorType.Brown -> result.brown++
+            ColorType.White -> result.white++
         }
 
         result.averageV += hsv[2]
@@ -160,6 +179,28 @@ fun colorTypesPerImage(name: String): ImageColorType
 
     if (result.blueS == (Float.NaN as Number)) result.blueS = 0f
     if (result.blueV == (Float.NaN as Number)) result.blueV = 0f
+
+    //False
+    val oneColorOnly = oneOrLess(result.brown, result.green, result.blue)
+    val averageVSmaller = result.averageV < 30
+    val greyBig = result.grey > 10
+    val greenBlueBig = if (result.blue != 0) result.green / result.blue > 3 else false
+    val brownBlueBig = if (result.blue != 0) (result.brown / result.blue) > 4 else false
+    var brownBlueNoGreen = (if (result.blue != 0) result.brown / result.blue else 0) > 1 && result.green == 0
+    var isTooWhite = result.white >= 2
+
+    if(oneColorOnly || averageVSmaller || greyBig || greenBlueBig || brownBlueBig || brownBlueNoGreen || isTooWhite)
+    {
+        result.score = 0
+        return result
+    }
+
+    result.score = 50
+
+    if (if (result.green != 0) result.brown / result.green > 7 else false) result.score += 30
+    if (result.red > 0) result.score += 10
+    if (result.green > 0) result.score += 10
+    if (result.white > 0) result.score -= 10
 
     return result
 }
