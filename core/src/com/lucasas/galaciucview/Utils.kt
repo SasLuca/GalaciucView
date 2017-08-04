@@ -117,7 +117,7 @@ fun colorTypesPerImage(name: String): ImageAnalysisResult
 {
     val result = ImageAnalysisResult()
 
-    val img = ImageIO.read(File("$testType/$name"))
+    val img = ImageIO.read(File("uploads/$name"))
     val dominantColor = ColorThief.getColorMap(img, 5).vboxes[0].avg(false)
     var hsv = rgbToHsv(dominantColor[0].f(), dominantColor[1].f(), dominantColor[2].f())
 

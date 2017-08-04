@@ -7,5 +7,4 @@ package com.lucasas.galaciucview
  */
 
 
-data class ImageResult(val name: String, val score: Float)
-data class Results(val scores: Array<ImageResult>)
+data class ImageResult(val name: String, val score: Int, val time: Long)
