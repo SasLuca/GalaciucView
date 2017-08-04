@@ -87,7 +87,7 @@ fun getColorType(h: Float, s: Float, v: Float) : ColorType
 
     when
     {
-        h.between(351f, 360f) -> return ColorType.Brick
+        h.between(261f, 299f) -> return ColorType.Brick
         h.between(25f, 56f) -> return ColorType.Brown
         h.between(75f, 144f) -> return ColorType.Green
         h.between(160f, 260f) -> return ColorType.Blue
@@ -107,6 +107,8 @@ data class ImageAnalysisResult(
                           var other: Int = 0,
                           var blueS: Float = 0f,
                           var blueV: Float = 0f,
+                          var greenS: Float = 0f,
+                          var greenV: Float = 0f,
                           var averageV: Float = 0f,
                           var score: Int = 0
                          )
@@ -164,7 +166,11 @@ fun colorTypesPerImage(name: String): ImageAnalysisResult
             ColorType.Brick -> result.brick++
             ColorType.Red -> result.red++
             ColorType.Grey -> result.grey++
-            ColorType.Green -> result.green++
+            ColorType.Green -> {
+                result.green++
+                result.greenS += hsv[1]
+                result.greenV += hsv[2]
+            }
             ColorType.Other -> result.other++
             ColorType.Brown -> result.brown++
             ColorType.White -> result.white++
@@ -173,8 +179,10 @@ fun colorTypesPerImage(name: String): ImageAnalysisResult
         result.averageV += hsv[2]
     }
 
-    result.blueS /= result.blue
-    result.blueV /= result.blue
+    if (result.blue != 0) result.blueS /= result.blue
+    if (result.blue != 0) result.blueV /= result.blue
+    if (result.green != 0) result.greenS /= result.green
+    if (result.green != 0) result.greenV /= result.green
     result.averageV /= palette.vboxes.size
 
     if (result.blueS == (Float.NaN as Number)) result.blueS = 0f
@@ -189,7 +197,7 @@ fun colorTypesPerImage(name: String): ImageAnalysisResult
     var brownBlueNoGreen = (if (result.blue != 0) result.brown / result.blue else 0) > 1 && result.green == 0
     var isTooWhite = result.white >= 2
 
-    if(oneColorOnly || averageVSmaller || greyBig || greenBlueBig || brownBlueBig || brownBlueNoGreen || isTooWhite)
+    if (oneColorOnly || averageVSmaller || greyBig || greenBlueBig || brownBlueBig || brownBlueNoGreen || isTooWhite || result.greenV > 79f)
     {
         result.score = 0
         return result

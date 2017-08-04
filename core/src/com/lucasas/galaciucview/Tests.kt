@@ -13,7 +13,141 @@ import javax.imageio.ImageIO
 
 val testType = "negative"
 
-fun testColorResults(image: String = "positive1")
+@TestOnly fun searchForPicsTest()
+{
+    val folder = File("$testType")
+
+    var brown = 0
+    var green = 0
+    var blue = 0
+    var red = 0
+    var grey = 0
+    var brick = 0
+    var white = 0
+    var other = 0
+    var blueS = 0f
+    var blueV = 0f
+    var averageV = 0f
+    var highestGrey = 0
+    var oneColor = false
+    var averageVSmaller = false
+    var maxGreenBlueRatio = 0
+    var maxBrownGreenRatio = 0
+    var maxBrownBlueRatio = 0
+    var greyBig = false
+    var greenBlueRatioBig = false
+    var brownBlueRatioBig = false
+    var brownBlueNoGreen = false
+    var failCount = 0
+    var maxBlueBrownRatio = 0
+    var minGreenS = 9999f
+    var minGreenV = 9999f
+    var maxGreenS = 0f
+    var maxGreenV = 0f
+
+    var score = 0
+
+
+    if (folder.isDirectory && folder.list().size > 0)
+    {
+        for (f in folder.list())
+        {
+            oneColor = false
+            averageVSmaller = false
+            greyBig = false
+
+            testColorResults(f)
+
+            val result = colorTypesPerImage(f)
+
+            brick += result.brick
+            brown += result.brown
+            green += result.green
+            blue += result.blue
+            red += result.red
+            grey += result.grey
+            white += result.white
+            other += result.other
+            blueS += result.blueS
+            blueV += result.blueV
+            averageV += result.averageV
+
+            oneColor = oneOrLess(result.brown, result.green, result.blue)
+            averageVSmaller = result.averageV < 30
+            greyBig = result.grey > 10
+
+            val greenBlueRatio = if (result.blue != 0) result.green / result.blue else 0
+            val brownGreenRatio = if (result.green != 0) result.brown / result.green else 0
+            val brownBlueRatio = if (result.blue != 0) result.brown / result.blue else 0
+            var blueBrownRatio = if (result.brown == 0) 0 else result.blue / result.brown
+
+            brownBlueNoGreen = (if (result.blue != 0) result.brown / result.blue else 0) > 1 && result.green == 0
+
+            if (result.blue != 0) brownBlueRatioBig = (result.brown / result.blue) > 4
+
+            if (result.blue != 0) greenBlueRatioBig = (result.green / result.blue) > 3
+
+            if (maxGreenBlueRatio < greenBlueRatio)
+                maxGreenBlueRatio = greenBlueRatio
+
+            if (maxBrownGreenRatio < brownGreenRatio)
+                maxBrownGreenRatio = brownGreenRatio
+
+            if (maxBrownBlueRatio < brownBlueRatio)
+                maxBrownBlueRatio = brownBlueRatio
+
+            if (maxBlueBrownRatio < blueBrownRatio)
+                maxBlueBrownRatio = blueBrownRatio
+
+            if (minGreenS > result.greenS && result.green > 0)
+                minGreenS = result.greenS
+
+            if (minGreenV > result.greenV && result.green > 0)
+                minGreenV = result.greenV
+
+            if (maxGreenS < result.greenS && result.green > 0)
+                maxGreenS = result.greenS
+
+            if (maxGreenV < result.greenV && result.green > 0)
+                maxGreenV = result.greenV
+
+            if (averageVSmaller || oneColor || averageVSmaller || greenBlueRatioBig || greyBig || brownBlueRatioBig || brownBlueNoGreen || result.white >= 2 || result.greenV > 79f)
+                failCount++
+
+            if (result.grey > highestGrey)
+                highestGrey = result.grey
+
+            score += result.score
+        }
+
+        println()
+        println("$testType average color ${if(failCount > 0) "FAIL" else ""}")
+        println("Brick: ${brick}")
+        println("Brown:${brown / folder.list().size}")
+        println("Green:${green / folder.list().size}")
+        println("Blue:${blue / folder.list().size}")
+        println("Red:${red / folder.list().size}")
+        println("Grey:${grey / folder.list().size}")
+        println("White: ${white / folder.list().size}")
+        println("Other:${other / folder.list().size}")
+        println("BlueS:${blueS / folder.list().size}")
+        println("BlueV:${blueV / folder.list().size}")
+        println("MinGreenS:${minGreenS}")
+        println("MinGreenV:${minGreenV}")
+        println("MaxGreenS:${maxGreenS}")
+        println("MaxGreenV:${maxGreenV}")
+        println("MaxGreenBlueRatio:${maxGreenBlueRatio}")
+        println("MaxBrownGreenRatio:${maxBrownGreenRatio}")
+        println("MaxBlueBrownRatio:${maxBlueBrownRatio}")
+        println("MaxBrownBlueRatio:${maxBrownBlueRatio}")
+        println("AverageV:${averageV / folder.list().size}")
+        println("HighestGrey:${highestGrey}")
+        println("FailCount:${failCount}")
+        println("Score:${score / folder.list().size}")
+    }
+}
+
+@TestOnly fun testColorResults(image: String = "positive1")
 {
     val result = colorTypesPerImage(image)
 
@@ -25,6 +159,7 @@ fun testColorResults(image: String = "positive1")
     var brownBlueNoGreen = (if (result.blue != 0) result.brown / result.blue else 0) > 1 && result.green == 0
     var blueBrownRatio = if (result.brown == 0) 0 else result.blue / result.brown
     var greenBrownRatio = if (result.brown == 0) 0 else result.green / result.brown
+    var greyGreenRatio = if (result.green == 0) 0 else result.grey / result.green
 
     if (oneOrLess(result.brown, result.green, result.blue))
         oneColor = true
@@ -35,7 +170,7 @@ fun testColorResults(image: String = "positive1")
     if (result.blue != 0) brownBlueRatioBig = (result.brown / result.blue) > 4
 
     println()
-    println("#$image ${if(oneColor || averageVSmaller || greyBig || greenBlueRatioBig || brownBlueRatioBig || brownBlueNoGreen || result.white > 2) "FAIL" else ""}")
+    println("#$image ${if(oneColor || averageVSmaller || greyBig || greenBlueRatioBig || brownBlueRatioBig || brownBlueNoGreen || result.white >= 2 || result.greenV > 79f) "FAIL" else ""}")
     println("Brick: ${result.brick}")
     println("Brown: ${result.brown}")
     println("Green: ${result.green}")
@@ -44,6 +179,7 @@ fun testColorResults(image: String = "positive1")
     println("Grey: ${result.grey}")
     println("White: ${result.white}")
     println("Other: ${result.other}")
+    println("Grey/Green: $greyGreenRatio")
     println("Brown/Blue no Green: ${brownBlueNoGreen}")
     println("Blue/Brown: ${blueBrownRatio}")
     println("Green/Blue: ${if (result.blue != 0) result.green / result.blue else 0}")
@@ -52,6 +188,8 @@ fun testColorResults(image: String = "positive1")
     println("Brown/Blue: ${if (result.blue != 0) result.brown / result.blue else 0}")
     println("BlueS: ${result.blueS}")
     println("BlueV: ${result.blueV}")
+    println("GreenS: ${result.greenS}")
+    println("GreenV: ${result.greenV}")
     println("AverageV: ${result.averageV}")
     println("Score:${result.score}")
 }
